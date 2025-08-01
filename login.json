@@ -1,0 +1,25 @@
+{
+  "apps": [
+    {
+      "name": "Salesforce",
+      "url": "https://login.salesforce.com",
+      "field": "username",
+      "value": "pavithra.thangarasu14520@agentforce.com",
+      "password": "Pavithra@14"
+    },
+    {
+      "name": "Gmail",
+      "url": "https://accounts.google.com/signin",
+      "field": "email",
+      "value": "testuser@gmail.com",
+      "password": "Password@123"
+    },
+    {
+      "name": "CustomApp",
+      "url": "https://platform.testleaf.com",
+      "field": "user_id",
+      "value": "user123",
+      "password": "Password@123"
+    }
+  ]
+}
