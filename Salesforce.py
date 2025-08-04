@@ -51,6 +51,6 @@ if __name__ == '__main__':
             report_name='report', 
             report_title='Salesforce Login Test Report',
             combine_reports=True,
-            add_timestamp=False     
+            add_timestamp=True     
         )
     )
