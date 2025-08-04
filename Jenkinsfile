@@ -19,7 +19,7 @@ pipeline {
 
         stage('Archive HTML Report') {
             steps {
-                archiveArtifacts artifacts: 'reports/*.html', onlyIfSuccessful: true
+                archiveArtifacts artifacts: 'deployment/reports/*.html', onlyIfSuccessful: true
             }
         }
     }
