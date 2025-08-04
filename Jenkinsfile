@@ -11,10 +11,7 @@ pipeline {
         stage('Set up Python & Run Tests') {
             steps {
                 bat '''
-                python -m venv venv
-                venv\Scripts\Activate.ps1
-                pip install --upgrade pip
-                pip install selenium HtmlTestRunner
+               call "selenium Practice\\.venv\\Scripts\\activate.bat"
                 python Salesforce.py
                 '''
             }
