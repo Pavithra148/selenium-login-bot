@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/Pavithra148/selenium-login-bot.git'
+                git branch: 'main', url: 'https://github.com/Pavithra148/selenium-login-bot.git'
             }
         }
 
