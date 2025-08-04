@@ -47,7 +47,7 @@ class LoginTest(unittest.TestCase):
 if __name__ == '__main__':
       unittest.main(
         testRunner=HtmlTestRunner.HTMLTestRunner(
-            output='reports',
+            output='deployment/reports',
             report_name='report', 
             report_title='Salesforce Login Test Report',
             combine_reports=True,
