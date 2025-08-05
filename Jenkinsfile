@@ -8,26 +8,27 @@ pipeline {
             }
         }
 
-        stage('Set up Python & Run Tests') {
-           steps {
-              bat '''
-              python -m venv venv
-              call venv\\Scripts\\activate.bat
-              pip install selenium pytest pytest-html HtmlTestRunner
-              mkdir reports
-              pytest --html=reports/Salesforce.html
-              '''
+        stage('Install Dependencies') {
+            steps {
+                bat '''
+                    call "selenium Practice\\.venv\\Scripts\\activate.bat"
+                    pip install -r requirements.txt
+                '''
             }
         }
 
-        stage('Archive HTML Report') {
+        stage('Run Pytest') {
+            steps {
+                bat '''
+                    call "selenium Practice\\.venv\\Scripts\\activate.bat"
+                    pytest --html=reports/Salesforce.html --self-contained-html
+                '''
+            }
+        }
+
+        stage('Archive Report') {
             steps {
                 archiveArtifacts artifacts: 'reports/*.html', onlyIfSuccessful: true
-                publishHTML (target: [
-                    reportDir: 'reports',
-                    reportFiles: 'Salesforce.html',
-                    reportName: 'Test Report'
-                ])
             }
         }
     }
