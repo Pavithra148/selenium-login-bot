@@ -8,21 +8,27 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Run Tests') {
             steps {
-                bat 'pip install --user -r requirements.txt'
-            }
-        }
-
-        stage('Run Pytest') {
-            steps {
-                bat 'python -m pytest --html=report.html'
+                bat '''
+                call "selenium Practice\\.venv\\Scripts\\activate.bat"
+                pytest test_salesforce.py --html=report.html
+                '''
             }
         }
 
         stage('Archive Report') {
             steps {
-                archiveArtifacts artifacts: 'report.html', fingerprint: true
+                archiveArtifacts artifacts: 'report.html', onlyIfSuccessful: true
+            }
+        }
+
+        stage('Copy Report to Deployment Folder') {
+            steps {
+                bat '''
+                mkdir "Deployment"
+                copy report.html "Deployment\\report.html"
+                '''
             }
         }
     }
