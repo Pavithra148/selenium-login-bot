@@ -15,7 +15,7 @@ pipeline {
               call venv\\Scripts\\activate.bat
               pip install selenium pytest pytest-html HtmlTestRunner
               mkdir reports
-              pytest Salesforce.py --html=reports/Salesforce.html
+              pytest --html=reports/Salesforce.html
               '''
             }
         }
