@@ -11,7 +11,10 @@ pipeline {
         stage('Set up Python & Run Tests') {
             steps {
                 bat '''
-                call "selenium Practice\\.venv\\Scripts\\activate.bat"
+                python -m venv venv
+                call venv\\Scripts\\activate.bat
+                pip install --upgrade pip
+                pip install selenium pytest pytest-html
                 pytest --html=reports/Salesforce.html test_salesforce.py
                 '''
             }
@@ -20,20 +23,12 @@ pipeline {
         stage('Archive HTML Report') {
             steps {
                 archiveArtifacts artifacts: 'reports/*.html', onlyIfSuccessful: true
+                publishHTML (target: [
+                    reportDir: 'reports',
+                    reportFiles: 'Salesforce.html',
+                    reportName: 'Test Report'
+                ])
             }
-        }
-    }
-
-    post {
-        always {
-            publishHTML([
-                reportDir: 'reports',
-                reportFiles: 'Salesforce.html',
-                reportName: 'Test Report',
-                allowMissing: false,
-                alwaysLinkToLastBuild: true,
-                keepAll: true
-            ])
         }
     }
 }
