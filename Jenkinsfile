@@ -11,7 +11,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 bat '''
-                call "selenium_Practice\\.venv\\Scripts\\activate.bat"
+                cd selenium_Practice
+                call .venv\\Scripts\\activate.bat
                 pytest test_salesforce.py --html=report.html
                 '''
             }
@@ -19,15 +20,16 @@ pipeline {
 
         stage('Archive Report') {
             steps {
-                archiveArtifacts artifacts: 'report.html', onlyIfSuccessful: true
+                archiveArtifacts artifacts: 'selenium_Practice/report.html', onlyIfSuccessful: true
             }
         }
 
         stage('Copy Report to Deployment Folder') {
             steps {
                 bat '''
-                mkdir "Deployment"
-                copy report.html "Deployment\\report.html"
+                cd selenium_Practice
+                mkdir Deployment
+                copy report.html Deployment\\report.html
                 '''
             }
         }
