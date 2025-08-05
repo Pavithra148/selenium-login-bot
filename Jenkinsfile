@@ -9,14 +9,14 @@ pipeline {
         }
 
         stage('Set up Python & Run Tests') {
-            steps {
-                bat '''
-                python -m venv venv
-                call venv\\Scripts\\activate.bat
-                pip install --upgrade pip
-                pip install selenium pytest pytest-html
-                pytest Salesforce.py --html=reports/Salesforce.html
-                '''
+           steps {
+              bat '''
+              python -m venv venv
+              call venv\\Scripts\\activate.bat
+              pip install selenium pytest pytest-html HtmlTestRunner
+              mkdir reports
+              pytest Salesforce.py --html=reports/Salesforce.html
+              '''
             }
         }
 
