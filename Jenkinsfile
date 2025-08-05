@@ -15,7 +15,7 @@ pipeline {
                 call venv\\Scripts\\activate.bat
                 pip install --upgrade pip
                 pip install selenium pytest pytest-html
-                pytest --html=reports/Salesforce.html test_salesforce.py
+                pytest Salesforce.py --html=reports/Salesforce.html
                 '''
             }
         }
