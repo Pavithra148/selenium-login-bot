@@ -11,7 +11,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 bat '''
-                call "selenium Practice\\.venv\\Scripts\\activate.bat"
+                call "selenium_Practice\\.venv\\Scripts\\activate.bat"
                 pytest test_salesforce.py --html=report.html
                 '''
             }
