@@ -8,6 +8,12 @@ pipeline {
             }
         }
 
+stage('Install Dependencies') {
+            steps {
+                bat 'python -m pip install --upgrade pip'
+                bat 'pip install pytest pytest-html'
+            }
+        }
         stage('Run Tests') {
             steps {
                 bat '''
