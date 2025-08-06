@@ -16,11 +16,7 @@ stage('Install Dependencies') {
         }
         stage('Run Tests') {
             steps {
-                bat '''
-                cd selenium_Practice
-                call .venv\\Scripts\\activate.bat
-                pytest test_salesforce.py --html=report.html
-                '''
+                bat 'python -m pytest selenium_Practice/test_salesforce.py --html=selenium_Practice/report.html'
             }
         }
 
