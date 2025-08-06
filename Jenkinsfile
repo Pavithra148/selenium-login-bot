@@ -23,12 +23,13 @@ pipeline {
       }
     }
     stage('Copy Report to Deployment Folder') {
-      steps {
-        bat '''
-        mkdir Deployment
-        copy report.html Deployment\\report.html
-        '''
-      }
-    }
+  steps {
+    bat '''
+    cd selenium_Practice
+    if not exist Deployment mkdir Deployment
+    copy report.html Deployment\\report.html
+    '''
+  }
+}
   }
 }
