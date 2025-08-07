@@ -1,13 +1,14 @@
 pipeline {
   agent any
 
-  environment {
-    JAVA_HOME = 'C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.9.0-hotspot'
-    PATH = "${env.JAVA_HOME}\\bin;${env.PATH}"
+  tools {
+    jdk 'jdk17'               // Replace 'jdk17' with your exact JDK name from Jenkins
+    allure 'Allure-CLI'       // Should match the Allure tool name in Jenkins
   }
 
-  tools {
-    allure 'Allure-CLI' // This must match the name in Jenkins > Global Tool Configuration
+  environment {
+    JAVA_HOME = "${tool 'jdk17'}"                     // Dynamically resolve the JDK path
+    PATH = "${env.JAVA_HOME}\\bin;${env.PATH}"        // Append to PATH for CLI tools
   }
 
   stages {
