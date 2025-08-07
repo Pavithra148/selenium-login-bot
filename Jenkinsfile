@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   tools {
-    jdk 'jdk17'               // Name must match Jenkins > Global Tool Configuration
+    jdk 'jdk-17'               // Name must match Jenkins > Global Tool Configuration
     allure 'Allure-CLI'
   }
 
