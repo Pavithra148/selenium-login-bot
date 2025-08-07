@@ -1,7 +1,7 @@
 pipeline {
   agent any
   tools {
-    allure 'Allure' // This must match the name in Jenkins > Global Tool Configuration
+    allure 'Allure-CLI' // This must match the name in Jenkins > Global Tool Configuration
   }
   stages {
     stage('Checkout Code') {
