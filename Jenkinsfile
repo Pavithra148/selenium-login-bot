@@ -17,7 +17,7 @@ pipeline {
     }
     stage('Run Tests') {
       steps {
-        bat 'pytest test_salesforce.py --alluredir=allure-results'
+         bat 'python -m pytest test_salesforce.py --alluredir=allure-results'
       }
     }
     stage('Allure Report') {
