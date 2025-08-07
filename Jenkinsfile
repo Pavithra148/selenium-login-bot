@@ -2,13 +2,8 @@ pipeline {
   agent any
 
   tools {
-    jdk 'jdk17'               // Replace 'jdk17' with your exact JDK name from Jenkins
-    allure 'Allure-CLI'       // Should match the Allure tool name in Jenkins
-  }
-
-  environment {
-    JAVA_HOME = "${tool 'jdk17'}"                     // Dynamically resolve the JDK path
-    PATH = "${env.JAVA_HOME}\\bin;${env.PATH}"        // Append to PATH for CLI tools
+    jdk 'jdk17'               // Name must match Jenkins > Global Tool Configuration
+    allure 'Allure-CLI'
   }
 
   stages {
