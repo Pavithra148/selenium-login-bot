@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     triggers {
-        githubPush() // Trigger on GitHub push webhook
+        githubPush()
     }
 
     tools {
-        git 'TestG'             // Your Git tool name configured in Jenkins
-        jdk 'jdk-17'            // Your JDK name configured in Jenkins
-        allure 'Allure-CLI'     // Your Allure CLI tool configured in Jenkins
+        git 'TestG'           // Your Git tool name in Jenkins config
+        jdk 'jdk-17'          // Your JDK tool name
+        allure 'Allure-CLI'   // Your Allure tool name
     }
 
     stages {
@@ -44,14 +44,12 @@ pipeline {
 
         stage('Debug Workspace') {
             steps {
-                echo "Listing workspace files..."
                 bat 'dir /s'
             }
         }
 
         stage('Debug Allure Results Folder') {
             steps {
-                echo "Listing allure-results folder contents..."
                 bat 'dir allure-results'
             }
         }
@@ -64,7 +62,6 @@ pipeline {
 
         stage('Debug Allure Report Folder') {
             steps {
-                echo "Listing allure-report folder contents..."
                 bat 'dir allure-report'
             }
         }
