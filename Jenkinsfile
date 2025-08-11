@@ -6,7 +6,7 @@ pipeline {
     }
 
     tools {
-        git 'Default'             // Change 'Default' to your Git tool name in Jenkins config
+        git 'TestG'             // Change 'Default' to your Git tool name in Jenkins config
         jdk 'jdk-17'              // Your configured JDK
         allure 'Allure-CLI'       // Your configured Allure CLI
     }
