@@ -6,14 +6,21 @@ pipeline {
     }
 
     tools {
-        jdk 'jdk-17'               // Your configured JDK
-        allure 'Allure-CLI'        // Your configured Allure CLI tool
+        git 'Default'             // Change 'Default' to your configured Git tool name
+        jdk 'jdk-17'              // Your configured JDK
+        allure 'Allure-CLI'       // Your configured Allure CLI tool
     }
 
     stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/Pavithra148/selenium-login-bot.git'
+                git branch: 'main', url: 'https://github.com/Pavithra148/selenium-login-bot.git', changelog: false, poll: false
             }
         }
 
@@ -26,7 +33,12 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat 'python -m pytest test_salesforce.py --alluredir=allure-results'
+                script {
+                    def exitCode = bat(script: 'python -m pytest test_salesforce.py --alluredir=allure-results', returnStatus: true)
+                    if (exitCode != 0) {
+                        error "Tests failed with exit code ${exitCode}"
+                    }
+                }
             }
         }
 
@@ -53,27 +65,28 @@ pipeline {
                 archiveArtifacts artifacts: 'allure-report/**', allowEmptyArchive: true
             }
         }
-
-        stage('Clean Workspace') {
-            steps {
-                cleanWs()
-            }
-        }
     }
 
     post {
-    always {
-        echo "Build result at end: ${currentBuild.currentResult}"
+        always {
+            echo "Build result at end: ${currentBuild.currentResult}"
+            script {
+                def testResult = currentBuild.rawBuild.getAction(hudson.tasks.junit.TestResultAction.class)
+                if (testResult != null) {
+                    echo "Total tests: ${testResult.totalCount}, Failed: ${testResult.failCount}, Skipped: ${testResult.skipCount}"
+                } else {
+                    echo "No JUnit test results found."
+                }
+            }
+        }
+        success {
+            echo 'Pipeline succeeded'
+        }
+        failure {
+            echo 'Pipeline failed'
+        }
+        unstable {
+            echo 'Pipeline is unstable'
+        }
     }
-    success {
-        echo 'Pipeline succeeded'
-    }
-    failure {
-        echo 'Pipeline failed'
-    }
-    unstable {
-        echo 'Pipeline is unstable'
-    }
-}
-
 }
