@@ -6,15 +6,15 @@ pipeline {
     }
 
     tools {
-        git 'TestG'             // Your configured Git tool name in Jenkins Global Tool Config
-        jdk 'jdk-17'            // Your configured JDK name (case sensitive)
-        allure 'Allure-CLI'     // Your configured Allure CLI name
+        git 'TestG'           // Your Git tool name configured in Jenkins
+        jdk 'jdk-17'          // Your JDK tool name
+        allure 'Allure-CLI'   // Your Allure tool name
     }
 
     stages {
         stage('Clean Workspace') {
             steps {
-                cleanWs()  // Good to start clean
+                cleanWs()
             }
         }
 
@@ -34,11 +34,21 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    def exitCode = bat(script: 'python -m pytest test_salesforce.py --alluredir=allure-results', returnStatus: true)
+                    // Run pytest with allure results and junit xml output
+                    def exitCode = bat(
+                        script: 'python -m pytest test_salesforce.py --alluredir=allure-results --junitxml=reports/results.xml',
+                        returnStatus: true
+                    )
                     if (exitCode != 0) {
                         error "Tests failed with exit code ${exitCode}"
                     }
                 }
+            }
+        }
+
+        stage('Publish Test Results') {
+            steps {
+                junit 'reports/results.xml'
             }
         }
 
@@ -70,8 +80,6 @@ pipeline {
     post {
         always {
             echo "Build result at end: ${currentBuild.currentResult}"
-            // The following will only work if JUnit results are published in Jenkins,
-            // pytest by default does not generate JUnit xml, so this might print "No JUnit test results found."
             script {
                 def testResult = currentBuild.rawBuild.getAction(hudson.tasks.junit.TestResultAction.class)
                 if (testResult != null) {
