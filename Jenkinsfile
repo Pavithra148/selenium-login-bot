@@ -6,15 +6,15 @@ pipeline {
     }
 
     tools {
-        git 'TestG'             // Change 'Default' to your Git tool name in Jenkins config
-        jdk 'jdk-17'              // Your configured JDK
-        allure 'Allure-CLI'       // Your configured Allure CLI
+        git 'TestG'             // Your configured Git tool name in Jenkins Global Tool Config
+        jdk 'jdk-17'            // Your configured JDK name (case sensitive)
+        allure 'Allure-CLI'     // Your configured Allure CLI name
     }
 
     stages {
         stage('Clean Workspace') {
             steps {
-                cleanWs()
+                cleanWs()  // Good to start clean
             }
         }
 
@@ -70,6 +70,8 @@ pipeline {
     post {
         always {
             echo "Build result at end: ${currentBuild.currentResult}"
+            // The following will only work if JUnit results are published in Jenkins,
+            // pytest by default does not generate JUnit xml, so this might print "No JUnit test results found."
             script {
                 def testResult = currentBuild.rawBuild.getAction(hudson.tasks.junit.TestResultAction.class)
                 if (testResult != null) {
