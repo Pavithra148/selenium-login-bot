@@ -1,59 +1,63 @@
 pipeline {
-  agent any
+    agent any
 
-  tools {
-    jdk 'jdk-17'               // Name must match Jenkins > Global Tool Configuration
-    allure 'Allure-CLI'
-  }
-
-  stages {
-    stage('Checkout Code') {
-      steps {
-        git branch: 'main', url: 'https://github.com/Pavithra148/selenium-login-bot.git'
-      }
+    triggers {
+        githubPush() // This makes the pipeline run when GitHub webhook fires
     }
 
-    stage('Install Dependencies') {
-      steps {
-        bat 'python -m pip install --upgrade pip'
-        bat 'pip install pytest allure-pytest selenium'
-      }
+    tools {
+        jdk 'jdk-17'               // Must match name in Jenkins Global Tool Configuration
+        allure 'Allure-CLI'
     }
 
-    stage('Run Tests') {
-      steps {
-        bat 'python -m pytest test_salesforce.py --alluredir=allure-results'
-      }
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Pavithra148/selenium-login-bot.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                bat 'python -m pip install --upgrade pip'
+                bat 'pip install pytest allure-pytest selenium'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                bat 'python -m pytest test_salesforce.py --alluredir=allure-results'
+            }
+        }
+
+        stage('Allure Report') {
+            steps {
+                allure includeProperties: false, jdk: '', results: [[path: 'allure-results']]
+            }
+        }
+
+        stage('Archive Allure Report') {
+            steps {
+                archiveArtifacts artifacts: 'allure-report/**', allowEmptyArchive: true
+            }
+        }
+
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
     }
 
-    stage('Allure Report') {
-      steps {
-        allure includeProperties: false, jdk: '', results: [[path: 'allure-results']]
-      }
+    post {
+        always {
+            echo 'Pipeline finished'
+        }
+        success {
+            echo 'Pipeline succeeded'
+        }
+        failure {
+            echo 'Pipeline failed'
+        }
     }
-
-    stage('Archive Allure Report') {
-      steps {
-        archiveArtifacts artifacts: 'allure-report/**', allowEmptyArchive: true
-      }
-    }
-
-    stage('Clean Workspace') {
-      steps {
-        cleanWs()
-      }
-    }
-  }
-
-  post {
-    always {
-      echo 'Pipeline finished'
-    }
-    success {
-      echo 'Pipeline succeeded'
-    }
-    failure {
-      echo 'Pipeline failed'
-    }
-  }
 }
