@@ -6,7 +6,6 @@ pipeline {
     }
 
     tools {
-        git 'TestG'
         jdk 'jdk-17'
         allure 'Allure-CLI'
     }
@@ -31,12 +30,6 @@ pipeline {
             }
         }
 
-        stage('Prepare Allure Results Folder') {
-            steps {
-                bat 'if not exist allure-results mkdir allure-results'
-            }
-        }
-
         stage('Run Tests') {
             steps {
                 script {
@@ -50,21 +43,49 @@ pipeline {
             }
         }
 
+        stage('Debug Workspace') {
+            steps {
+                bat 'dir /s'
+            }
+        }
+
         stage('Debug Allure Results Folder') {
             steps {
-                bat 'echo ===== Contents of allure-results ====='
                 bat 'dir allure-results'
-                bat 'echo ===== File details ====='
-                bat 'dir allure-results /s'
             }
         }
 
         stage('Generate Allure Report') {
             steps {
-                script {
-                    if (fileExists('allure-results') && !isFolderEmpty('allure-results')) {
-                        allure includeProperties: false, results: [[path: 'allure-results']]
-                    } else {
-                        echo "⚠ No Allure results found — skipping report generation"
-                    }
-                }
+                allure includeProperties: false, results: [[path: 'allure-results']]
+            }
+        }
+
+        stage('Debug Allure Report Folder') {
+            steps {
+                bat 'dir allure-report'
+            }
+        }
+
+        stage('Archive Allure Report') {
+            steps {
+                archiveArtifacts artifacts: 'allure-report/**', allowEmptyArchive: true
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Build result at end: ${currentBuild.currentResult}"
+        }
+        success {
+            echo 'Pipeline succeeded'
+        }
+        failure {
+            echo 'Pipeline failed'
+        }
+        unstable {
+            echo 'Pipeline is unstable'
+        }
+    }
+}
