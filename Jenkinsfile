@@ -6,9 +6,9 @@ pipeline {
     }
 
     tools {
-        git 'TestG'           // Your Git tool name in Jenkins config
-        jdk 'jdk-17'          // Your JDK tool name
-        allure 'Allure-CLI'   // Your Allure tool name
+        git 'TestG'
+        jdk 'jdk-17'
+        allure 'Allure-CLI'
     }
 
     stages {
@@ -40,7 +40,7 @@ pipeline {
                             error "Tests failed with exit code ${exitCode}"
                         }
                     }
-                }  // <-- This was missing in your code!
+                }
             }
         }
 
