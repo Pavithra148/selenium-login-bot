@@ -6,7 +6,6 @@ pipeline {
     }
 
     tools {
-        git 'TestG'
         jdk 'jdk-17'
         allure 'Allure-CLI'
     }
