@@ -34,9 +34,10 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    def exitCode = bat(script: 'python -m pytest test_salesforce.py --alluredir=allure-results', returnStatus: true)
-                    if (exitCode != 0) {
-                        error "Tests failed with exit code ${exitCode}"
+                    dir("${WORKSPACE}") {
+                def exitCode = bat(script: 'python -m pytest test_salesforce.py --alluredir=allure-results', returnStatus: true)
+                if (exitCode != 0) {
+                    error "Tests failed with exit code ${exitCode}"
                     }
                 }
             }
