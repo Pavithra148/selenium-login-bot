@@ -62,17 +62,18 @@ pipeline {
     }
 
     post {
-        always {
-            echo 'Pipeline finished'
-        }
-        success {
-            echo 'Pipeline succeeded'
-        }
-        failure {
-            echo 'Pipeline failed'
-        }
-        unstable {
-            echo 'Pipeline is unstable'
-        }
+    always {
+        echo "Build result at end: ${currentBuild.currentResult}"
     }
+    success {
+        echo 'Pipeline succeeded'
+    }
+    failure {
+        echo 'Pipeline failed'
+    }
+    unstable {
+        echo 'Pipeline is unstable'
+    }
+}
+
 }
