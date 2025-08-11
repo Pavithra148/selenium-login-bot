@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     triggers {
-        githubPush() // Run on GitHub webhook push
+        githubPush() // Trigger on GitHub push webhook
     }
 
     tools {
-        git 'Default'             // Change 'Default' to your configured Git tool name
+        git 'Default'             // Change 'Default' to your Git tool name in Jenkins config
         jdk 'jdk-17'              // Your configured JDK
-        allure 'Allure-CLI'       // Your configured Allure CLI tool
+        allure 'Allure-CLI'       // Your configured Allure CLI
     }
 
     stages {
