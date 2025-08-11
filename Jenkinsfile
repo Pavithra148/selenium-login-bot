@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     triggers {
-        githubPush() // This makes the pipeline run when GitHub webhook fires
+        githubPush() // Run on GitHub webhook push
     }
 
     tools {
-        jdk 'jdk-17'               // Must match name in Jenkins Global Tool Configuration
-        allure 'Allure-CLI'
+        jdk 'jdk-17'               // Your configured JDK
+        allure 'Allure-CLI'        // Your configured Allure CLI tool
     }
 
     stages {
@@ -30,9 +30,21 @@ pipeline {
             }
         }
 
-        stage('Allure Report') {
+        stage('Debug Allure Results') {
             steps {
-                allure includeProperties: false, jdk: '', results: [[path: 'allure-results']]
+                bat 'dir allure-results'
+            }
+        }
+
+        stage('Generate Allure Report') {
+            steps {
+                allure includeProperties: false, results: [[path: 'allure-results']]
+            }
+        }
+
+        stage('Debug Allure Report Folder') {
+            steps {
+                bat 'dir allure-report'
             }
         }
 
@@ -58,6 +70,9 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed'
+        }
+        unstable {
+            echo 'Pipeline is unstable'
         }
     }
 }
