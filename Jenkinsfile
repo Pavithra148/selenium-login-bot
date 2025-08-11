@@ -6,9 +6,9 @@ pipeline {
     }
 
     tools {
-        git 'TestG'           // Your Git tool name configured in Jenkins
-        jdk 'jdk-17'          // Your JDK tool name
-        allure 'Allure-CLI'   // Your Allure tool name
+        git 'TestG'             // Your Git tool name configured in Jenkins
+        jdk 'jdk-17'            // Your JDK name configured in Jenkins
+        allure 'Allure-CLI'     // Your Allure CLI tool configured in Jenkins
     }
 
     stages {
@@ -34,11 +34,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    // Run pytest with allure results and junit xml output
-                    def exitCode = bat(
-                        script: 'python -m pytest test_salesforce.py --alluredir=allure-results --junitxml=reports/results.xml',
-                        returnStatus: true
-                    )
+                    def exitCode = bat(script: 'python -m pytest test_salesforce.py --alluredir=allure-results', returnStatus: true)
                     if (exitCode != 0) {
                         error "Tests failed with exit code ${exitCode}"
                     }
@@ -46,14 +42,16 @@ pipeline {
             }
         }
 
-        stage('Publish Test Results') {
+        stage('Debug Workspace') {
             steps {
-                junit 'reports/results.xml'
+                echo "Listing workspace files..."
+                bat 'dir /s'
             }
         }
 
-        stage('Debug Allure Results') {
+        stage('Debug Allure Results Folder') {
             steps {
+                echo "Listing allure-results folder contents..."
                 bat 'dir allure-results'
             }
         }
@@ -66,6 +64,7 @@ pipeline {
 
         stage('Debug Allure Report Folder') {
             steps {
+                echo "Listing allure-report folder contents..."
                 bat 'dir allure-report'
             }
         }
@@ -80,14 +79,6 @@ pipeline {
     post {
         always {
             echo "Build result at end: ${currentBuild.currentResult}"
-            script {
-                def testResult = currentBuild.rawBuild.getAction(hudson.tasks.junit.TestResultAction.class)
-                if (testResult != null) {
-                    echo "Total tests: ${testResult.totalCount}, Failed: ${testResult.failCount}, Skipped: ${testResult.skipCount}"
-                } else {
-                    echo "No JUnit test results found."
-                }
-            }
         }
         success {
             echo 'Pipeline succeeded'
