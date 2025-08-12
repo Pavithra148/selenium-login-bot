@@ -2,12 +2,11 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'nodejs-18'    // Make sure Node.js tool is configured in Jenkins
-        allure 'Allure-CLI'   // Allure tool configured in Jenkins
+        nodejs 'nodejs-18'
+        allure 'Allure-CLI'
     }
 
     stages {
-
         stage('Clean Workspace') {
             steps {
                 cleanWs()
@@ -31,3 +30,47 @@ pipeline {
                 }
             }
         }
+
+        stage('Run Tests') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'npx playwright test --reporter=line'
+                    } else {
+                        bat 'npx playwright test --reporter=line'
+                    }
+                }
+            }
+        }
+
+        stage('Generate Allure Report') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'npx allure generate allure-results --clean -o allure-report'
+                    } else {
+                        bat 'npx allure generate allure-results --clean -o allure-report'
+                    }
+                }
+            }
+        }
+
+        stage('Publish Allure Report') {
+            steps {
+                allure([
+                    reportBuildPolicy: 'ALWAYS',
+                    results: [[path: 'allure-results']]
+                ])
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "✅ Pipeline finished!"
+        }
+        failure {
+            echo "❌ Pipeline failed! Check logs."
+        }
+    }
+}
