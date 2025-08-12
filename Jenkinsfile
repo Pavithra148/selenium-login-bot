@@ -12,6 +12,7 @@ pipeline {
 
     environment {
         PYTHON_PATH = 'C:\\Users\\aravi\\AppData\\Local\\Programs\\Python\\Python313\\python.exe'
+        TIMESTAMP = "${new Date().format('yyyyMMdd_HHmmss')}"
     }
 
     stages {
@@ -38,9 +39,17 @@ pipeline {
             steps {
                 script {
                     dir("${WORKSPACE}") {
-                        // Run tests but ignore failures for build status
+                        // Run tests but force exit code 0 so pipeline never fails
                         bat(script: "\"${env.PYTHON_PATH}\" -m pytest -n auto test_salesforce.py --alluredir=allure-results || exit /b 0")
                     }
+                }
+            }
+        }
+
+        stage('Preserve Allure History') {
+            steps {
+                script {
+                    bat "if exist allure-results\\history xcopy /E /I /Y allure-results\\history allure-report\\history"
                 }
             }
         }
@@ -50,14 +59,20 @@ pipeline {
                 allure includeProperties: false, results: [[path: 'allure-results']]
             }
         }
+
+        stage('Save Allure Report with Timestamp') {
+            steps {
+                script {
+                    bat "mkdir allure-history"
+                    bat "xcopy /E /I /Y allure-report allure-history\\${env.TIMESTAMP}"
+                }
+            }
+        }
     }
 
     post {
         always {
-            echo "Final Build Status: SUCCESS (forced)"
-        }
-        success {
-            echo '✅ Pipeline marked as SUCCESS regardless of test results'
+            echo "✅ Pipeline forced to SUCCESS - check Allure report for failures."
         }
     }
 }
