@@ -2,50 +2,32 @@ pipeline {
     agent any
 
     tools {
-        jdk 'jdk-17'
-    }
-
-    environment {
-        PATH = "$PATH:/usr/local/bin"
-        PYTHONUNBUFFERED = '1'
+        nodejs 'nodejs-18'    // Make sure Node.js tool is configured in Jenkins
+        allure 'Allure-CLI'   // Allure tool configured in Jenkins
     }
 
     stages {
-        stage('Install Python Dependencies') {
+
+        stage('Clean Workspace') {
             steps {
-                sh '''
-                python3 -m pip install --upgrade pip
-                pip install pytest selenium webdriver-manager allure-pytest
-                '''
+                cleanWs()
             }
         }
 
-        stage('Run Tests') {
+        stage('Checkout Code') {
             steps {
-                sh '''
-                pytest --maxfail=1 --disable-warnings \
-                --alluredir=allure-results
-                '''
+                git branch: 'main', url: 'https://github.com/Pavithra148/selenium-login-bot.git'
             }
         }
 
-        stage('Generate Allure Report') {
+        stage('Install Dependencies') {
             steps {
-                allure([
-                    includeProperties: false,
-                    jdk: '',
-                    results: [[path: 'allure-results']]
-                ])
+                script {
+                    if (isUnix()) {
+                        sh 'npm install'
+                    } else {
+                        bat 'npm install'
+                    }
+                }
             }
         }
-    }
-
-    post {
-        always {
-            echo '✅ Pipeline finished!'
-        }
-        failure {
-            echo '❌ Pipeline failed! Check logs.'
-        }
-    }
-}
