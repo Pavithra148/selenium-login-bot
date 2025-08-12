@@ -1,14 +1,13 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPush()
+    }
+
     tools {
         jdk 'jdk-17'
         allure 'Allure-CLI'
-    }
-
-    environment {
-        // Use your python path (set earlier)
-        PYTHON = 'C:\\Users\\aravi\\AppData\\Local\\Programs\\Python\\Python313\\python.exe'
     }
 
     stages {
@@ -18,88 +17,79 @@ pipeline {
             }
         }
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                echo ">>> currentBuild BEFORE checkout: ${currentBuild.currentResult}"
                 git branch: 'main', url: 'https://github.com/Pavithra148/selenium-login-bot.git', changelog: false, poll: false
-                echo ">>> currentBuild AFTER checkout: ${currentBuild.currentResult}"
             }
         }
 
-        stage('Install dependencies') {
+        stage('Install Dependencies') {
             steps {
-                bat "\"${env.PYTHON}\" -m pip install --upgrade pip"
-                bat "\"${env.PYTHON}\" -m pip install pytest allure-pytest selenium pytest-xdist"
-                echo ">>> currentBuild AFTER pip install: ${currentBuild.currentResult}"
+                bat 'python -m pip install --upgrade pip'
+                bat 'pip install pytest allure-pytest selenium'
             }
         }
 
-        stage('Run tests') {
+        stage('Verify Workspace') {
             steps {
-                script {
-                    // run tests, capture exit code
-                    def rc = bat(script: "\"${env.PYTHON}\" -m pytest -n auto test_salesforce.py --alluredir=allure-results", returnStatus: true)
-                    echo ">>> pytest exit code: ${rc}"
-                    echo ">>> currentBuild AFTER pytest: ${currentBuild.currentResult}"
-                }
+                bat 'dir /s'
             }
         }
 
-        stage('Quick check allure-results for failures') {
-            steps {
-                // quick search for the word failed in result jsons
-                bat 'echo === Searching allure-results for "failed" ==='
-                bat 'findstr /S /I "failed" allure-results\\*.json || echo NO_FAILED_FOUND'
-            }
-        }
-
-        stage('Generate Allure report') {
-            steps {
-                echo ">>> currentBuild BEFORE allure generate: ${currentBuild.currentResult}"
-                allure includeProperties: false, results: [[path: 'allure-results']]
-                echo ">>> currentBuild AFTER allure generate: ${currentBuild.currentResult}"
-            }
-        }
-
-        stage('Inspect build actions (debug)') {
+        stage('Run Tests with Debug') {
             steps {
                 script {
-                    echo ">>> currentBuild at inspect stage: ${currentBuild.currentResult}"
-                    def rb = currentBuild.rawBuild
-                    if (rb == null) {
-                        echo "rawBuild is null (sandbox restriction?)"
-                    } else {
-                        // Check for JUnit action
-                        def junit = rb.getAction(hudson.tasks.junit.TestResultAction.class)
-                        echo "JUnit TestResultAction present: ${junit != null}"
-                        if (junit) {
-                            echo "  JUnit totals -> total: ${junit.totalCount}, failed: ${junit.failCount}, skipped: ${junit.skipCount}"
+                    dir("${WORKSPACE}") {
+                        // Fail fast on first test failure, show detailed errors
+                        def exitCode = bat(script: 'python -m pytest test_salesforce.py --maxfail=1 --disable-warnings -v --alluredir=allure-results', returnStatus: true)
+                        
+                        echo "Pytest exit code: ${exitCode}"
+                        
+                        if (exitCode != 0) {
+                            error "Tests failed. Check above logs for exact reason."
                         }
-
-                        // Print list of action class names so we can spot publishers
-                        def actions = rb.getActions().collect { it.class.name }.unique().join('\\n')
-                        echo "Actions attached to build:\\n${actions}"
                     }
                 }
             }
         }
 
-        stage('Archive Allure report') {
+        stage('Check Allure Results') {
+            steps {
+                bat 'dir allure-results'
+            }
+        }
+
+        stage('Generate Allure Report') {
+            steps {
+                allure includeProperties: false, results: [[path: 'allure-results']]
+            }
+        }
+
+        stage('Check Allure Report') {
+            steps {
+                bat 'dir allure-report'
+            }
+        }
+
+        stage('Archive Allure Report') {
             steps {
                 archiveArtifacts artifacts: 'allure-report/**', allowEmptyArchive: true
-                echo ">>> currentBuild AFTER archiveArtifacts: ${currentBuild.currentResult}"
             }
         }
     }
 
     post {
         always {
-            echo "=== POST: currentBuild.currentResult = ${currentBuild.currentResult} ==="
-            echo "If build is UNSTABLE, copy the console lines that show:"
-            echo "  - pytest exit code"
-            echo "  - output of findstr (NO_FAILED_FOUND or matches)"
-            echo "  - JUnit totals (if printed)"
-            echo "  - Actions attached to build"
+            echo "Build finished with status: ${currentBuild.currentResult}"
+        }
+        success {
+            echo '✅ Pipeline succeeded'
+        }
+        failure {
+            echo '❌ Pipeline failed — see logs above for details'
+        }
+        unstable {
+            echo '⚠️ Pipeline unstable — likely test failures'
         }
     }
 }
