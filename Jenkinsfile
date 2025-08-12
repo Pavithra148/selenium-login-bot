@@ -30,26 +30,24 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 bat "\"${env.PYTHON_PATH}\" -m pip install --upgrade pip"
-                bat "\"${env.PYTHON_PATH}\" -m pip install pytest allure-pytest selenium"
+                bat "\"${env.PYTHON_PATH}\" -m pip install pytest allure-pytest selenium pytest-xdist"
             }
         }
 
-        stage('Run Tests') {
+        stage('Run Tests in Parallel') {
             steps {
                 script {
                     dir("${WORKSPACE}") {
-                        def exitCode = bat(script: "\"${env.PYTHON_PATH}\" -m pytest test_salesforce.py --alluredir=allure-results", returnStatus: true)
+                        // Capture exit code but don't fail immediately
+                        def exitCode = bat(script: "\"${env.PYTHON_PATH}\" -m pytest -n auto test_salesforce.py --alluredir=allure-results", returnStatus: true)
+                        
+                        // Decide build status based on exit code
                         if (exitCode != 0) {
+                            currentBuild.result = 'FAILURE'
                             error "Tests failed with exit code ${exitCode}"
                         }
                     }
                 }
-            }
-        }
-
-        stage('Debug Allure Results Folder') {
-            steps {
-                bat 'dir allure-results'
             }
         }
 
@@ -58,32 +56,17 @@ pipeline {
                 allure includeProperties: false, results: [[path: 'allure-results']]
             }
         }
-
-        stage('Debug Allure Report Folder') {
-            steps {
-                bat 'dir allure-report'
-            }
-        }
-
-        stage('Archive Allure Report') {
-            steps {
-                archiveArtifacts artifacts: 'allure-report/**', allowEmptyArchive: true
-            }
-        }
     }
 
     post {
         always {
-            echo "Build result at end: ${currentBuild.currentResult}"
-        }
-        success {
-            echo 'Pipeline succeeded'
+            echo "Final Build Status: ${currentBuild.result}"
         }
         failure {
-            echo 'Pipeline failed'
+            echo '❌ Pipeline failed due to test errors'
         }
-        unstable {
-            echo 'Pipeline is unstable'
+        success {
+            echo '✅ Pipeline passed without issues'
         }
     }
 }
