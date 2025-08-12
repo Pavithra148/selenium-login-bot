@@ -7,6 +7,7 @@ pipeline {
 
     environment {
         PATH = "$PATH:/usr/local/bin"
+        PYTHONUNBUFFERED = '1'
     }
 
     stages {
@@ -22,7 +23,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
-                pytest --maxfail=1 --disable-warnings -q \
+                pytest --maxfail=1 --disable-warnings \
                 --alluredir=allure-results
                 '''
             }
@@ -41,10 +42,10 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline finished!'
+            echo '✅ Pipeline finished!'
         }
         failure {
-            echo 'Pipeline failed! Check logs.'
+            echo '❌ Pipeline failed! Check logs.'
         }
     }
 }
