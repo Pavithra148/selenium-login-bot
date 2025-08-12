@@ -10,6 +10,10 @@ pipeline {
         allure 'Allure-CLI'
     }
 
+    environment {
+        PYTHON_PATH = 'C:\\Users\\aravi\\AppData\\Local\\Programs\\Python\\Python313\\python.exe'
+    }
+
     stages {
         stage('Clean Workspace') {
             steps {
@@ -25,8 +29,8 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                bat 'python -m pip install --upgrade pip'
-                bat 'pip install pytest allure-pytest selenium'
+                bat "\"${env.PYTHON_PATH}\" -m pip install --upgrade pip"
+                bat "\"${env.PYTHON_PATH}\" -m pip install pytest allure-pytest selenium"
             }
         }
 
@@ -34,18 +38,12 @@ pipeline {
             steps {
                 script {
                     dir("${WORKSPACE}") {
-                        def exitCode = bat(script: 'python -m pytest test_salesforce.py --alluredir=allure-results', returnStatus: true)
+                        def exitCode = bat(script: "\"${env.PYTHON_PATH}\" -m pytest test_salesforce.py --alluredir=allure-results", returnStatus: true)
                         if (exitCode != 0) {
                             error "Tests failed with exit code ${exitCode}"
                         }
                     }
                 }
-            }
-        }
-
-        stage('Debug Workspace') {
-            steps {
-                bat 'dir /s'
             }
         }
 
