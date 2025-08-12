@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     tools {
-        jdk 'jdk-17'
-        maven 'Maven'
+        python 'Python3' // Configure this in Jenkins → Manage Jenkins → Tools → Python Installations
     }
 
     environment {
@@ -23,7 +22,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
-                pytest --maxfail=1 --disable-warnings -q \
+                pytest --maxfail=1 --disable-warnings \
                 --alluredir=allure-results
                 '''
             }
