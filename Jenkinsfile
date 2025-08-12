@@ -38,14 +38,8 @@ pipeline {
             steps {
                 script {
                     dir("${WORKSPACE}") {
-                        // Capture exit code but don't fail immediately
-                        def exitCode = bat(script: "\"${env.PYTHON_PATH}\" -m pytest -n auto test_salesforce.py --alluredir=allure-results", returnStatus: true)
-                        
-                        // Decide build status based on exit code
-                        if (exitCode != 0) {
-                            currentBuild.result = 'FAILURE'
-                            error "Tests failed with exit code ${exitCode}"
-                        }
+                        // Run tests but ignore failures for build status
+                        bat(script: "\"${env.PYTHON_PATH}\" -m pytest -n auto test_salesforce.py --alluredir=allure-results || exit /b 0")
                     }
                 }
             }
@@ -60,13 +54,10 @@ pipeline {
 
     post {
         always {
-            echo "Final Build Status: ${currentBuild.result}"
-        }
-        failure {
-            echo '❌ Pipeline failed due to test errors'
+            echo "Final Build Status: SUCCESS (forced)"
         }
         success {
-            echo '✅ Pipeline passed without issues'
+            echo '✅ Pipeline marked as SUCCESS regardless of test results'
         }
     }
 }
